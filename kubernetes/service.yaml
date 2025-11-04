@@ -3,9 +3,11 @@ kind: Service
 metadata:
   name: rest-server
 spec:
+  type: NodePort
   selector:
     app: rest-server
   ports:
     - protocol: TCP
-      port: 80
+      port: 8081
       targetPort: 8081
+      nodePort: 30001
