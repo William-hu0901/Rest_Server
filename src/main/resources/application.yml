@@ -1,0 +1,12 @@
+server:
+  port: 8081
+  address: 0.0.0.0
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"  # expose all endpoints，can also expose points such as "health,info"
+  endpoint:
+    health:
+      show-details: never  # show details, other options: never, when-authorized
+

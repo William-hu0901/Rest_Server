@@ -3,16 +3,22 @@ This is RESTFUL server base on spring boot, it is built with docker and deployed
 #Build project：
 mvn clean package
 #Build Docker image：
-docker build -t rest-server 
-#Run in docker container:
+docker build -t rest-server .
+#Run a new docker container:
 docker run -p 8081:8081 --name rest-server rest-server
 #Access the API:
 http://localhost:8081/api/hello
 
-#Or deploy to Kubernetes：
+#Or deploy to Kubernetes and start a service：
 kubectl apply -f kubernetes/deployment.yaml
 kubectl apply -f kubernetes/service.yaml
-#Start Nginx：
-docker run -d -p 8080:8080 -v $(pwd)/nginx.conf:/etc/nginx/nginx.conf nginx
-#Access the API through Nginx:
-http://localhost:8080/api/hello
+#Access the API via k8s cluster ip and node port 30001:
+http://${cluster_ip}:30001/api/hello
+
+#useful commands for reference
+#view log of pod
+kubectl logs ${pod_name}
+#get ip of pod
+kubectl get pods -o wide
+#validate exposed port
+kubectl get svc rest-server
