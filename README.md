@@ -22,3 +22,9 @@ kubectl logs ${pod_name}
 kubectl get pods -o wide
 #validate exposed port
 kubectl get svc rest-server
+
+#sample command to query data from powershell
+curl.exe `
+  -X POST http://localhost:8081/api/queryData `
+-H "Content-Type: application/json" `
+-d '{"username":"<postgres_user>","password":"<pg_pwd>","sql":"select * from users limit 2"}'
