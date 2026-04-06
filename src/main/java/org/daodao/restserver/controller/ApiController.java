@@ -1,11 +1,10 @@
 package org.daodao.restserver.controller;
 
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.daodao.restserver.connector.PostgresConnector;
-import org.daodao.restserver.dbconfig.DatabaseConfig;
 import org.daodao.restserver.dto.QueryRequest;
 import org.daodao.restserver.dto.QueryResponse;
-import org.daodao.restserver.exceptions.PropertyException;
 import org.json.JSONObject;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +17,10 @@ import java.sql.Types;
 @RequestMapping("/api")
 @Slf4j
 public class ApiController {
+
+    @Resource
+    private PostgresConnector postgresConnector;
+
     @GetMapping("/hello")
     public String sayHello() {
         return "Hello, World!";
@@ -42,35 +45,15 @@ public class ApiController {
     }
 
     public ResultSet actionOnPostgres(QueryRequest request) {
-        PostgresConnector postgresConnector = null;
         try {
-            // Load configuration from application.properties
-            DatabaseConfig config = new DatabaseConfig();
-
-            // Create PostgreSQL connector using configuration
-            postgresConnector = new PostgresConnector(
-                    config.getPostgresHost(),
-                    config.getPostgresPort(),
-                    config.getPostgresDatabase(),
-                    request.getUsername(),
-                    request.getPassword()
-            );
-
-            postgresConnector.connect();
-            log.info("Successfully connected to PostgreSQL database.");
-
-            // Execute query and return result
+            log.info("Executing query using Spring Boot datasource.");
             ResultSet resultSet = postgresConnector.read(request.getSql());
             return resultSet;
 
         } catch (SQLException e) {
             log.error("Database error occurred: ", e);
-        } catch (PropertyException e) {
-            log.error("Configuration error occurred: ", e);
         } catch (Exception e) {
             log.error("Unexpected error occurred: ", e);
-        } finally {
-            if (postgresConnector != null) postgresConnector.disconnect();
         }
 
         return null;
@@ -78,6 +61,7 @@ public class ApiController {
 
     private String parseResultset(ResultSet resultSet) throws SQLException {
         JSONObject jsonResult = new JSONObject();
+        org.json.JSONArray rows = new org.json.JSONArray();
         ResultSetMetaData metaData = resultSet.getMetaData();
         int columnCount = metaData.getColumnCount();
 
@@ -93,8 +77,9 @@ public class ApiController {
                     row.put(columnName, resultSet.getInt(i));
                 }
             }
-            jsonResult.append("rows", row);
+            rows.put(row);
         }
+        jsonResult.put("rows", rows);
         return jsonResult.toString();
     }
 

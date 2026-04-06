@@ -1,12 +1,32 @@
 server:
   port: 8081
   address: 0.0.0.0
+
+spring:
+  application:
+    name: daodao-restful-api
+
+  # standard spring Boot datasource config
+  datasource:
+    url: jdbc:postgresql://database-postgres.chams8ws6974.ap-southeast-1.rds.amazonaws.com:5432/postgres
+    username: postgres
+    password:
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: DaodaoDockerHikariCP
+      mmaximum-pool-size: 10       # max connection num
+      minimum-idle: 5            # max idel connection num ≤ maximum-pool-size
+      connection-timeout: 5000   # retrieve connection timeout
+      idle-timeout: 60000        # idle connection timeout
+      max-lifetime: 600000       # max connection lifetime
+      leak-detection-threshold: 60000 # leak detection threshold
+
 management:
   endpoints:
     web:
       exposure:
-        include: "*"  # expose all endpoints，can also expose points such as "health,info"
+        include: "health,info,metrics,prometheus"  # expose all endpoints，can also expose points such as "health,info,metrics,prometheus"
   endpoint:
     health:
-      show-details: never  # show details, other options: never, when-authorized
+      show-details: always  # show details, other options: never, when-authorized
 

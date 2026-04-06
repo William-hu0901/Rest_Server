@@ -1,0 +1,51 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+    timeout: 1s
+    send_batch_size: 1024
+
+  resource:
+    attributes:
+      - key: service.name
+        value: daodao-restful-api
+        action: upsert
+
+exporters:
+  # X-Ray for traces
+  awsxray:
+    region: ap-southeast-1
+
+  # CloudWatch EMF for metrics (正确的导出器名称)
+  awsemf:
+    region: ap-southeast-1
+    namespace: ADOT/Application
+
+  # CloudWatch Logs
+  awscloudwatchlogs:
+    region: ap-southeast-1
+    log_group_name: /aws/adot/daodao-app
+    log_stream_name: daodao-app-stream
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch, resource]
+      exporters: [awsxray]
+
+    metrics:
+      receivers: [otlp]
+      processors: [batch, resource]
+      exporters: [awsemf]  # 使用 awsemf 而不是 awscloudwatch
+
+    logs:
+      receivers: [otlp]
+      processors: [batch, resource]
+      exporters: [awscloudwatchlogs]
