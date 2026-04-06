@@ -1,0 +1,58 @@
+
+services:
+  #Optional: AWS OTEL Collector
+  aws-otel-collector:
+    image: public.ecr.aws/aws-observability/aws-otel-collector:latest
+    command: [ "--config=/etc/adot-collector-config.yaml" ]
+    environment:
+      - AWS_REGION=ap-southeast-1
+    volumes:
+      - ${PWD}/adot-collector-config.yaml:/etc/adot-collector-config.yaml:ro  # 使用绝对路径和只读
+    ports:
+      - "4317:4317"   # OTLP gRPC receiver
+      - "4318:4318"   # OTLP HTTP receiver
+    networks:
+      - daodao-network
+
+  daodao-app:
+    # 使用ECR镜像
+    image: 579209107634.dkr.ecr.ap-southeast-1.amazonaws.com/daodao-restful-api:latest
+    container_name: daodao-restful-api
+    ports:
+      - "8081:8081"
+    environment:
+      # Spring Boot配置
+      - SPRING_PROFILES_ACTIVE=production
+      - SERVER_PORT=8081
+      - SERVER_ADDRESS=0.0.0.0
+
+      # OpenTelemetry配置
+      - OTEL_SERVICE_NAME=daodao-restful-api
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=daodao-restful-api,service.version=1.0
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://aws-otel-collector:4317
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+      - OTEL_TRACES_EXPORTER=otlp
+      - OTEL_METRICS_EXPORTER=otlp
+      - OTEL_LOGS_EXPORTER=otlp
+      - OTEL_JAVAAGENT_LOGGING=INFO  # 减少详细日志
+
+      # 数据库配置， 否则容器里报错Connection to localhost:5432 refused
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://database-postgres.chams8ws6974.ap-southeast-1.rds.amazonaws.com:5432/postgres
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
+
+    restart: unless-stopped
+    logging: # 日志配置
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - daodao-network
+    depends_on:
+      - aws-otel-collector
+
+networks:
+  daodao-network:
+    driver: bridge
