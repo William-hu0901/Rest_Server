@@ -16,8 +16,8 @@ services:
 
   daodao-app:
     # 使用ECR镜像
-    image: 579209107634.dkr.ecr.ap-southeast-1.amazonaws.com/daodao-restful-api:latest
-    container_name: daodao-restful-api
+    image: 579209107634.dkr.ecr.ap-southeast-1.amazonaws.com/rest-server:latest
+    container_name: rest-server
     ports:
       - "8081:8081"
     environment:
@@ -27,8 +27,8 @@ services:
       - SERVER_ADDRESS=0.0.0.0
 
       # OpenTelemetry配置
-      - OTEL_SERVICE_NAME=daodao-restful-api
-      - OTEL_RESOURCE_ATTRIBUTES=service.name=daodao-restful-api,service.version=1.0
+      - OTEL_SERVICE_NAME=rest-server
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=rest-server,service.version=1.0
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://aws-otel-collector:4317
       - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
       - OTEL_TRACES_EXPORTER=otlp

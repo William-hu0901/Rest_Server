@@ -13,9 +13,9 @@ COPY target/rest-server-0.0.1-SNAPSHOT.jar /app/app.jar
 
 # set environment variables
 ENV JAVA_TOOL_OPTIONS="-javaagent:/app/aws-opentelemetry-agent.jar"
-ENV OTEL_SERVICE_NAME="daodao-restful-api"
+ENV OTEL_SERVICE_NAME="rest-server"
 ENV OTEL_SERVICE_VERSION="1.0.0"
-ENV OTEL_RESOURCE_ATTRIBUTES="service.name=daodao-restful-api,service.version=1.0.0,deployment.environment=production"
+ENV OTEL_RESOURCE_ATTRIBUTES="service.name=rest-server,service.version=1.0.0,deployment.environment=production"
 
 
 # Expose port 8081
