@@ -1,5 +1,13 @@
 package org.daodao.restserver.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.daodao.restserver.connector.PostgresConnector;
@@ -16,18 +24,36 @@ import java.sql.Types;
 @RestController
 @RequestMapping("/api")
 @Slf4j
+@Tag(name = "API Controller", description = "Provides database query and basic API services")
 public class ApiController {
 
     @Resource
     private PostgresConnector postgresConnector;
 
     @GetMapping("/hello")
+    @Operation(summary = "Health Check Endpoint", description = "Returns Hello World for testing if API is running normally")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully returned greeting message",
+                    content = @Content(mediaType = "text/plain",
+                            schema = @Schema(implementation = String.class)))
+    })
     public String sayHello() {
         return "Hello, World!";
     }
 
     @PostMapping("/queryData")
-    public QueryResponse queryData(@RequestBody QueryRequest request) {
+    @Operation(summary = "Query Database", description = "Execute SQL query and return results")
+    @SecurityRequirement(name = "bearerAuth")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Query successful",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = QueryResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request parameters", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
+    })
+    public QueryResponse queryData(
+            @Parameter(description = "Query request parameters, including username, password and SQL statement", required = true)
+            @RequestBody QueryRequest request) {
         log.info("Querying data from PostgreSQL database.");
         try {
             ResultSet resultSet = actionOnPostgres(request);

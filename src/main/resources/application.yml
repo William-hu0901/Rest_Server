@@ -4,13 +4,19 @@ server:
 
 spring:
   application:
-    name: daodao-restful-api
+    name: rest-server
+
+  security:
+    user:
+      name: admin
+      password: ${ADMIN_PASS}
 
   # standard spring Boot datasource config
   datasource:
-    url: jdbc:postgresql://database-postgres.chams8ws6974.ap-southeast-1.rds.amazonaws.com:5432/postgres
+    url: jdbc:postgresql://localhost:5432/postgres
+    #url: jdbc:postgresql://database-postgres.chams8ws6974.ap-southeast-1.rds.amazonaws.com:5432/postgres
     username: postgres
-    password:
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
     hikari:
       pool-name: DaodaoDockerHikariCP
@@ -21,6 +27,11 @@ spring:
       max-lifetime: 600000       # max connection lifetime
       leak-detection-threshold: 60000 # leak detection threshold
 
+# JWT configuration
+jwt:
+  secret: MyVerySecureSecretKeyForJWTTokenGeneration123456789
+  expiration: 86400000  # 24 hours in milliseconds
+
 management:
   endpoints:
     web:
@@ -29,4 +40,22 @@ management:
   endpoint:
     health:
       show-details: always  # show details, other options: never, when-authorized
+
+# SpringDoc OpenAPI configuration
+springdoc:
+  # Only scan specific controller package
+  packages-to-scan: org.daodao.restserver.controller
+  # Only match specific API paths
+  paths-to-match: /api/**
+  # Enable Swagger UI
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+  # Enable API docs endpoint
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+
+
+
 
