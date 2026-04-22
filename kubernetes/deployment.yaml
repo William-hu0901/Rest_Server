@@ -15,6 +15,11 @@ spec:
       containers:
       - name: rest-server
         image: rest-server:latest
+        env:
+          - name: ADMIN_PASS
+            value: ""
+          - name: DB_PASSWORD
+            value: ""
         ports:
         - containerPort: 8081
         resources:

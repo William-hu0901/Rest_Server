@@ -5,12 +5,9 @@ mvn clean package
 #Build Docker image：
 docker build -t rest-server .
 #Run a new docker container:
-docker run -p 8081:8081 --name rest-server rest-server
+docker run -p 8081:8081 --name rest-server rest-server  -e ADMIN_PASS=<use for JWT token> -e DB_PASSWORD=<DB pwd>
 #Access the API:
 http://localhost:8081/api/hello
-
-# Access Swagger UI:
-http://localhost:8081/swagger-ui.html
 
 # JWT Authentication
 ## 1. Get JWT Token
@@ -25,7 +22,7 @@ Response:
 ```
 
 ## 2. Use JWT Token in Swagger
-1. Open Swagger UI: http://localhost:8081/swagger-ui.html
+1. Open Swagger UI: http://localhost:8081/swagger-ui/index.html
 2. Click "Authorize" button (top right)
 3. Enter: `Bearer <your_token>` (replace <your_token> with actual token)
 4. Click "Authorize"
@@ -37,11 +34,22 @@ curl -X POST http://localhost:8081/api/queryData \
   -H "Authorization: Bearer <your_token>" \
   -d '{"sql":"select * from users limit 2"}'
 ```
+## Get User By Username
+```bash
+curl -X GET http://localhost:8081/api/user/john \
+  -H "Authorization: Bearer <your_token>"
+```
+Response:
+```json
+{"status":"success","data":"{\"rows\":[{\"id\":1,\"username\":\"john\",\"email\":\"john@example.com\"}]}","error":null}
+```
 
 # Or deploy to Kubernetes and start a service：
 kubectl apply -f kubernetes/deployment.yaml
 kubectl apply -f kubernetes/service.yaml
-#Access the API via k8s cluster ip and node port 30001:
+#Enable port forward to 30001,don't close the window:
+kubectl port-forward service/nginx-k8s 30080:8081
+#access app via forward
 http://${cluster_ip}:30001/api/hello
 
 #useful commands for reference
