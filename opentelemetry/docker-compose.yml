@@ -38,8 +38,8 @@ services:
 
       # 数据库配置， 否则容器里报错Connection to localhost:5432 refused
       - SPRING_DATASOURCE_URL=jdbc:postgresql://database-postgres.chams8ws6974.ap-southeast-1.rds.amazonaws.com:5432/postgres
-      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
-      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASS}
       - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
 
     restart: unless-stopped
