@@ -14,11 +14,12 @@ import java.util.Arrays;
 
 @Slf4j
 @Component
-public class PostgresConnector {
+public class MySqlConnector {
+
     private final DataSource dataSource;
 
-    public PostgresConnector(@Qualifier("postgresDataSource") DataSource dataSource) {
-        this.dataSource = dataSource;
+    public MySqlConnector(@Qualifier("mysqlDataSource") DataSource mysqlDataSource) {
+        this.dataSource = mysqlDataSource;
     }
 
     public String readAsString(String query) throws SQLException {
@@ -29,7 +30,7 @@ public class PostgresConnector {
             connection = dataSource.getConnection();
             statement = connection.createStatement();
             resultSet = statement.executeQuery(query);
-            log.info("Executed READ query: {}", query);
+            log.info("Executed MySQL READ query: {}", query);
             return parseResultsetWithJackson(resultSet);
         } finally {
             closeQuietly(resultSet, statement, connection);
@@ -47,7 +48,7 @@ public class PostgresConnector {
                 preparedStatement.setObject(i + 1, params[i]);
             }
             resultSet = preparedStatement.executeQuery();
-            log.info("Executed READ query with params: {} | params: {}", query, Arrays.toString(params));
+            log.info("Executed MySQL READ query with params: {} | params: {}", query, Arrays.toString(params));
             return parseResultsetWithJackson(resultSet);
         } finally {
             closeQuietly(resultSet, preparedStatement, connection);
@@ -66,12 +67,11 @@ public class PostgresConnector {
                 ObjectNode row = mapper.createObjectNode();
                 for (int i = 1; i <= columnCount; i++) {
                     String columnName = metaData.getColumnName(i);
-                    int columnType = metaData.getColumnType(i);
-
-                    if (columnType == Types.VARCHAR || columnType == Types.CHAR) {
-                        row.put(columnName, resultSet.getString(i));
-                    } else if (columnType == Types.INTEGER) {
-                        row.put(columnName, resultSet.getInt(i));
+                    Object value = resultSet.getObject(i);
+                    if (value == null) {
+                        row.putNull(columnName);
+                    } else {
+                        row.putPOJO(columnName, value);
                     }
                 }
                 rows.add(row);
@@ -117,11 +117,10 @@ public class PostgresConnector {
             connection = dataSource.getConnection();
             statement = connection.createStatement();
             int rowsAffected = statement.executeUpdate(sql);
-            log.info("Executed UPDATE statement: {}, rows affected: {}", sql, rowsAffected);
+            log.info("Executed MySQL UPDATE statement: {}, rows affected: {}", sql, rowsAffected);
             return "{\"rowsAffected\": " + rowsAffected + "}";
         } finally {
             closeQuietly(null, statement, connection);
         }
     }
-
 }

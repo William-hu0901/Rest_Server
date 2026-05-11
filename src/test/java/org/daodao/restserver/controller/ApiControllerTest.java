@@ -22,9 +22,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestPropertySource(properties = {
-    "ADMIN_PASS=admin123",
-    "spring.security.user.password=admin123",
-    "spring.dataource.password=admin123"
+    "spring.security.user.password=${SECURE_PASS}",
+    "spring.dataource.password=${POSTGRES_PASS}"
 })
 class ApiControllerTest {
 
@@ -54,7 +53,10 @@ class ApiControllerTest {
     @Test
     void testQueryData_Success() throws Exception {
         when(queryService.executeQuery(anyString())).thenReturn("{\"rows\":[{\"id\":1,\"name\":\"test\"}]}");
-        QueryRequest request = new QueryRequest("testuser", "password123", "SELECT * FROM users");
+        QueryRequest request = new QueryRequest();
+        request.setUsername("testuser");
+        request.setPassword("password123");
+        request.setSql("SELECT * FROM users");
         String token = getJwtToken();
 
         mockMvc.perform(post("/api/queryData")
@@ -96,7 +98,10 @@ class ApiControllerTest {
     @Test
     void testQueryData_WithSpecialCharacters() throws Exception {
         when(queryService.executeQuery(anyString())).thenReturn("{\"rows\":[{\"name\":\"test\"}]}");
-        QueryRequest request = new QueryRequest("user@domain.com", "p@ssw0rd!", "SELECT * FROM table WHERE name = 'test'");
+        QueryRequest request = new QueryRequest();
+        request.setUsername("user@domain.com");
+        request.setPassword("p@ssw0rd!");
+        request.setSql("SELECT * FROM table WHERE name = 'test'");
         String token = getJwtToken();
 
         mockMvc.perform(post("/api/queryData")
