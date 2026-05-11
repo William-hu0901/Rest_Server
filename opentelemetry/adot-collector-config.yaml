@@ -14,7 +14,7 @@ processors:
   resource:
     attributes:
       - key: service.name
-        value: daodao-restful-api
+        value: rest-server
         action: upsert
 
 exporters:

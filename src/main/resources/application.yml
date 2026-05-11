@@ -4,22 +4,48 @@ server:
 
 spring:
   application:
-    name: daodao-restful-api
+    name: rest-server
+
+  security:
+    user:
+      name: admin
+      password: ${SECURE_PASS}
 
   # standard spring Boot datasource config
   datasource:
-    url: jdbc:postgresql://database-postgres.chams8ws6974.ap-southeast-1.rds.amazonaws.com:5432/postgres
+    url: jdbc:postgresql://localhost:5432/postgres
+    #url: jdbc:postgresql://database-postgres.chams8ws6974.ap-southeast-1.rds.amazonaws.com:5432/postgres
     username: postgres
-    password:
+    password: ${POSTGRES_PASS}
     driver-class-name: org.postgresql.Driver
     hikari:
-      pool-name: DaodaoDockerHikariCP
-      mmaximum-pool-size: 10       # max connection num
+      pool-name: PostgresHikariCP
+      maximum-pool-size: 10       # max connection num
       minimum-idle: 5            # max idel connection num ≤ maximum-pool-size
       connection-timeout: 5000   # retrieve connection timeout
       idle-timeout: 60000        # idle connection timeout
       max-lifetime: 600000       # max connection lifetime
       leak-detection-threshold: 60000 # leak detection threshold
+
+  # MySQL datasource config
+  datasource-mysql:
+    url: jdbc:mysql://localhost:3306/testdb
+    username: root
+    password: ${MYSQL_PASS}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      pool-name: MySQLHikariCP
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 5000
+      idle-timeout: 60000
+      max-lifetime: 600000
+      leak-detection-threshold: 60000
+
+# JWT configuration
+jwt:
+  secret: MyVerySecureSecretKeyForJWTTokenGeneration123456789
+  expiration: 86400000  # 24 hours in milliseconds
 
 management:
   endpoints:
@@ -29,4 +55,22 @@ management:
   endpoint:
     health:
       show-details: always  # show details, other options: never, when-authorized
+
+# SpringDoc OpenAPI configuration
+springdoc:
+  # Only scan specific controller package
+  packages-to-scan: org.daodao.restserver.controller
+  # Only match specific API paths
+  paths-to-match: /api/**
+  # Enable Swagger UI
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+  # Enable API docs endpoint
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+
+
+
 
